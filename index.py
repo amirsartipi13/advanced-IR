@@ -54,9 +54,9 @@ def csv_reader_index(index, file_name):
 
 
 if __name__ == '__main__':
-    drop_coulmns('en-books-dataset.csv', 'books.csv')
+    # drop_coulmns('en-books-dataset.csv', 'books.csv')
     delete_existing_index('books')
-    #delete_stop_words('books.csv')
+    # delete_stop_words('books.csv')
     csv_reader_index('books', 'books.csv')
     print('done !')
 
