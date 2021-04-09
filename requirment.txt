@@ -2,3 +2,4 @@ elasticsearch
 pyelasticsearch
 pandas
 nltk
+gensim
