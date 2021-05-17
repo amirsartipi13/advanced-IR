@@ -3,3 +3,5 @@ pyelasticsearch
 pandas
 nltk
 gensim
+fasttext
+progressbar2
