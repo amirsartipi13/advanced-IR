@@ -82,30 +82,55 @@ def convert_to_vector(index):
 
             }}
     models = []
+    files = []
+    words = ['a', 'b', 'c', 'd']
     # for read data by pagination 
-    for frm in range(0, 82):
+    for frm in range(0, 1):
         search_param['from'] = frm
         response = elastic_client.search(index=index, body=search_param)
         docs = response['hits']['hits']
         for doc in docs:
             f = open('temp.txt', 'w+')
             f.write(doc['_source']['abstract'])
+            text = doc['_source']['abstract']
             # f.write(doc['_source']['body text'])
             f.close()
             try:
                 model = fasttext.train_unsupervised('temp.txt', 'skipgram',minn=2, maxn=5, dim=300,  epoch=1, lr=0.5)
                 models.append({"_id":doc['_id'], "model":model})
-                print(model.words)
+                files.append(" ".join(['__label__' + w for w in model.words[:10]]) + " " + text + '\n')
             # it is beacuse minimum length of document should be 5 word and some abstract are les than that
             except Exception as e:
                 print(e)
-    return models
+    return files
+
+
+
+  
+
+def learn_test_model(files):
+
+    train = ''.join(files[:int((len(files) * 0.8))])
+    test = ''.join(files[-int((len(files) * 0.2)):])
+
+    tr = open("train.txt", 'w')
+    tr.write(train)
+    tr.close()
+
+    tt = open("test.txt", 'w')
+    tt.write(test)
+    tt.close()
+
+    model = fasttext.train_supervised(input="train.txt", lr=0.5, epoch=25, wordNgrams=2, bucket=200000, dim=50, loss='ova')
+    
+    print(model.test('test.txt'))
 
 if __name__ == '__main__':
     # drop_coulmns('en-books-dataset.csv', 'books.csv')
     # delete_existing_index('books')
     # delete_stop_words('books.csv')
     # csv_reader_index('books', 'books_final.csv')
-    convert_to_vector('books')
+    files = convert_to_vector('books')
+    learn_test_model(files)
     print('done !')
 
